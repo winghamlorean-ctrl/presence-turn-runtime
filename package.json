@@ -4,14 +4,14 @@
   "version": "0.1.0",
   "license": "MIT",
   "type": "module",
-  "description": "The turn law companion chat is missing. No maid-service, no 你先忙, no empty parens, no silent rewrite. Classify once · strip, never invent · salvage ≤1 · mood carries. Browser-only.",
+  "description": "The turn law companion chat is missing. No maid-service, no 你先忙, no empty parens, no silent rewrite. Classify once · strip, never invent · salvage ≤1 · mood carries. No backend.",
   "keywords": [
     "llm",
     "chat",
     "companion",
     "dialogue",
     "turn-taking",
-    "client-side"
+    "no-backend"
   ],
   "scripts": {
     "dev": "vite",

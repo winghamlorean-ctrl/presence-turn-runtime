@@ -13,7 +13,7 @@ Most companion bots don't fail at IQ. They fail **the line**:
 
 Then mood carries — attachment / hurt / trust / guard — so “hi” tomorrow does not wipe last night.
 
-One function: `sendTurn`. Browser only. Your UI, your key, your character pack.
+One function: `sendTurn`. No backend. Your UI, your key, your character pack. Demo 是浏览器页；引擎本身是普通 JS + `fetch`。叠态/记忆目前用 `localStorage` 落盘，Node 里自己垫一层存储即可。
 
 ```
 classify once → constraint card → strip (never invent) → salvage ≤ 1 → mood + memory carry
@@ -43,7 +43,7 @@ npm install
 npm run dev
 ```
 
-打开终端提示的地址（默认 `http://localhost:5177`），填自己的 API Key，以及任意 **OpenAI 兼容** Chat Completions 地址。右边会显示本轮 `turnKind`、叠态和有没有抢救——那就是这套引擎在干什么。
+打开终端提示的地址（默认 `http://localhost:5177`），填自己的 API Key，以及任意 **OpenAI 兼容** Chat Completions 地址。右边会显示本轮 `turnKind`、叠态和有没有抢救——那就是这套引擎在干什么。Demo 在浏览器里跑；把 `sendTurn` 接到自己的客户端即可。
 
 ## Use as a module
 
