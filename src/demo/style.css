@@ -1,0 +1,159 @@
+:root {
+  --ink: #1c1915;
+  --paper: #f4efe6;
+  --panel: #ebe4d6;
+  --line: #cfc4b0;
+  --accent: #9a4d2e;
+  --mute: #6f675c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Songti SC", serif;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr) 260px;
+  min-height: 100vh;
+}
+
+.rail,
+.debug {
+  padding: 28px 22px;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+}
+
+.debug {
+  border-right: 0;
+  border-left: 1px solid var(--line);
+}
+
+.kicker {
+  margin: 0 0 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--mute);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.lede,
+.hint {
+  color: var(--mute);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 12px 0;
+  font-size: 12px;
+  color: var(--mute);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+input,
+textarea,
+button,
+pre {
+  font: inherit;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #faf6ee;
+  color: var(--ink);
+  padding: 8px 10px;
+  border-radius: 2px;
+}
+
+button {
+  border: 0;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.log {
+  list-style: none;
+  margin: 0;
+  padding: 28px;
+  flex: 1;
+  overflow: auto;
+}
+
+.log li {
+  max-width: 36em;
+  margin: 0 0 18px;
+  line-height: 1.55;
+}
+
+.log .user {
+  color: var(--mute);
+}
+
+.log .assistant .spoken {
+  font-size: 18px;
+}
+
+.log .assistant .stage-note {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--mute);
+}
+
+.composer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  padding: 16px 28px 24px;
+  border-top: 1px solid var(--line);
+}
+
+.debug pre {
+  white-space: pre-wrap;
+  font-size: 12px;
+  line-height: 1.45;
+  font-family: ui-monospace, "Cascadia Mono", monospace;
+  color: var(--ink);
+}
+
+@media (max-width: 980px) {
+  .app {
+    grid-template-columns: 1fr;
+  }
+  .rail,
+  .debug {
+    border: 0;
+    border-bottom: 1px solid var(--line);
+  }
+}

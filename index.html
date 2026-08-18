@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Turn Runtime</title>
+    <link rel="stylesheet" href="/src/demo/style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="rail">
+        <p class="kicker">Presence Turn Runtime</p>
+        <h1>空白角色，一轮 send</h1>
+        <p class="lede">
+          自己的 UI + 自己的 API Key。空白角色，不带剧情或视觉。
+        </p>
+
+        <label>
+          API Key
+          <input id="apiKey" type="password" autocomplete="off" />
+        </label>
+        <label>
+          Endpoint
+          <input id="endpoint" />
+        </label>
+        <label>
+          Model
+          <input id="model" />
+        </label>
+        <label>
+          角色名
+          <input id="packName" />
+        </label>
+        <label>
+          用户名（回勾用）
+          <input id="factName" placeholder="可空" />
+        </label>
+        <label>
+          饮品偏好（回勾用）
+          <input id="factDrink" placeholder="可空" />
+        </label>
+        <button type="button" id="saveCfg">保存配置</button>
+        <p class="hint">任意 OpenAI 兼容 Chat Completions 地址即可。</p>
+      </aside>
+
+      <main class="stage">
+        <ol id="log" class="log"></ol>
+        <form id="form" class="composer">
+          <textarea id="input" rows="2" placeholder="说一句…"></textarea>
+          <button type="submit" id="send">发送</button>
+        </form>
+      </main>
+
+      <aside class="debug">
+        <p class="kicker">本轮</p>
+        <pre id="debug">还没发过。</pre>
+      </aside>
+    </div>
+    <script type="module" src="/src/demo/main.js"></script>
+  </body>
+</html>
