@@ -4,13 +4,14 @@
   "version": "0.1.0",
   "license": "MIT",
   "type": "module",
-  "description": "No-backend, client-side turn dialogue runtime. Bring your own UI, API key, and character pack.",
+  "description": "Companion chat fails this turn: maid-service, you-go-busy, empty stage directions, or a silent rewrite. This engine classifies once, strips without inventing, salvages at most once, and lets mood carry. No backend.",
   "keywords": [
     "llm",
     "chat",
-    "dialogue",
     "companion",
-    "turn-based"
+    "dialogue",
+    "turn-taking",
+    "client-side"
   ],
   "scripts": {
     "dev": "vite",

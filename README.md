@@ -1,26 +1,27 @@
 # Presence Turn Runtime
 
-No-backend, client-side turn dialogue runtime.  
-Bring your own UI, API key, and character pack — one `sendTurn` per user message.
+Companion models do not usually fail at being smart. They fail **this turn**.
 
-无后端、浏览器里跑的回合对话引擎。自己的界面 + 自己的 Key，一轮一次 `sendTurn`。  
-不绑固定角色，不带剧情、视觉、通知或移动壳。
+They fetch a glass of water you did not ask to be served. They say「你先忙」when you asked a question. They return parentheses with no spoken line. Or the app decides the reply was not good enough and silently hits the model again.
 
-## What you get
+This is a **no-backend turn engine** for that problem. You bring the UI, the API key, and a character pack. Each user line is one `sendTurn`: classify the turn, strip forbidden families without inventing a replacement, salvage **at most once**, and let mood carry so the next greeting does not wipe last night's sting.
 
-- 本轮分类 + 约束卡
-- 禁令族剥离（只剥不编）+ **每轮最多一次**抢救重写
-- 情绪叠态（惯性、张力后检）
-- 上下文编译 + 短聊节奏
-- 本地记忆检索进这一轮
-- 旁白 / `spokenText` 字段（TTS 不接）
-- 空白角色 Pack + 最小聊天页
+它不是 VTuber 平台，不是完整 App，也不绑任何人设。差别在回合纪律，不在立绘和实时语音。
 
-## What you do not get
+## What it actually does
 
-- 任何绑定角色或剧情包
-- 看一眼、发图、半视频
-- 离场通知、移动壳、设置中心、语音试验台
+- **本轮分类一次** → 写出这一轮约束卡（招呼 / 短附和 / 暂离 / 缓和 / 口渴…）
+- **禁令族只剥不编** → 伺候、训斥、打发从模型原文里抠掉；剥空就留残句，不灌「嗯。」
+- **抢救最多一次** → 空壳、禁语漏网、问句答偏才重打；不做「感觉虚就再写一遍」
+- **情绪叠态** → 放不下 / 受伤 / 信任 / 收住会惯性；张力后检拦认命腔和吃喝抹平
+- **短聊节奏 + 本地记忆** → 像微信一句；检索进这一轮，不另起后端
+- **旁白 / 台词分开** → `displayText` 可带句首括号，`spokenText` 是纯台词（TTS 你自己接）
+
+## What it is not
+
+- 角色包、剧情、Live2D、看一眼、通知、Android 壳
+- 服务端、多用户账号、把 Key 存在别人机器上
+- 保证「更像真人」的魔法。它只保证这一轮有规矩
 
 ## Quick start
 
@@ -29,12 +30,12 @@ npm install
 npm run dev
 ```
 
-打开终端提示的地址（默认 `http://localhost:5177`），填自己的 API Key，以及任意 **OpenAI 兼容** Chat Completions 地址。
+打开终端提示的地址（默认 `http://localhost:5177`），填自己的 API Key，以及任意 **OpenAI 兼容** Chat Completions 地址。右边会显示本轮 `turnKind`、叠态和有没有抢救——那就是这套引擎在干什么。
 
 ## Use as a module
 
 ```js
-import { sendTurn, BLANK_PACK, mergePack } from './src/index.js'
+import { sendTurn, mergePack } from './src/index.js'
 
 const result = await sendTurn({
   userMessage: '在吗',
@@ -52,9 +53,11 @@ const result = await sendTurn({
 
 result.replies[0].displayText  // 气泡（可带句首旁白）
 result.replies[0].spokenText   // 纯台词
+result.policy.turnKind         // greeting | short_ack | leaving | …
+result.salvage                 // 有没有第二遍、用了没有
 ```
 
-换角色只改 Pack（`src/pack/blank.js`），不要往引擎里写死人名。
+换角色只改 Pack（`src/pack/blank.js`）。人名、饮品偏好、口吻都放 Pack 里，不要写进引擎。
 
 ## Tests
 
@@ -62,12 +65,12 @@ result.replies[0].spokenText   // 纯台词
 npm test
 ```
 
-不打模型，只测分类 / 禁令剥离 / 抢救判定。
+不打模型。测的是分类、禁令剥离、抢救判定——也就是纪律本身。
 
 ## Safety
 
-API Key 只存在你本机（Demo 用 `localStorage`）。不要把 Key、对话日志提交进 git，也不要贴到 Issue 里。
+API Key 只在你本机（Demo 用 `localStorage`）。不要把 Key 或对话日志提交进 git，也不要贴到 Issue 里。
 
 ## License
 
-MIT
+MIT. Keep the copyright notice; use it in closed-source products if you want.
