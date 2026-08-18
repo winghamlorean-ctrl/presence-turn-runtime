@@ -1,10 +1,23 @@
 # Presence Turn Runtime
 
-Companion-chat **turn engine**: one `sendTurn` per user line. No backend. Bring your UI, API key, and a character pack.
+**The turn law companion chat is missing.**
 
-**This turn does:** classify once → write a constraint card → strip servant / scold / dodge lines without inventing a replacement → salvage **at most once** → carry mood (attachment / hurt / trust / guard) plus local memory into the next line. `displayText` may have a short stage paren; `spokenText` is the line itself.
+Most companion bots don't fail at IQ. They fail **the line**:
 
-Models usually do not fail at being smart. They fail this turn: pouring water you did not ask for, answering a question with「你先忙」, returning parentheses with no spoken line, or silently hitting the model again because the reply “felt weak”.
+| They do this | This engine does not |
+| --- | --- |
+| Pour you water you never asked to be served | Strip servant-speak. Never invent a replacement line. |
+| Answer a question with「你先忙」 | Dodge is a forbid family, not a personality. |
+| Return `(paused)` with nothing spoken | A turn must have a spoken line. |
+| Silently hit the model again because it “felt weak” | Salvage **at most once**, and only if the turn is actually broken. |
+
+Then mood carries — attachment / hurt / trust / guard — so “hi” tomorrow does not wipe last night.
+
+One function: `sendTurn`. Browser only. Your UI, your key, your character pack.
+
+```
+classify once → constraint card → strip (never invent) → salvage ≤ 1 → mood + memory carry
+```
 
 它不是 VTuber 平台，不是完整 App，也不绑任何人设。差别在回合纪律，不在立绘和实时语音。
 

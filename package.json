@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "license": "MIT",
   "type": "module",
-  "description": "Companion-chat turn engine: classify once, constraint card, strip without inventing, salvage at most once, mood carries, local memory. Browser-only, bring your own key.",
+  "description": "The turn law companion chat is missing. No maid-service, no 你先忙, no empty parens, no silent rewrite. Classify once · strip, never invent · salvage ≤1 · mood carries. Browser-only.",
   "keywords": [
     "llm",
     "chat",
