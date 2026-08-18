@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "license": "MIT",
   "type": "module",
-  "description": "Companion chat fails this turn: maid-service, you-go-busy, empty stage directions, or a silent rewrite. This engine classifies once, strips without inventing, salvages at most once, and lets mood carry. No backend.",
+  "description": "Companion-chat turn engine: classify once, constraint card, strip without inventing, salvage at most once, mood carries, local memory. Browser-only, bring your own key.",
   "keywords": [
     "llm",
     "chat",

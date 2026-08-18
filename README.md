@@ -1,10 +1,10 @@
 # Presence Turn Runtime
 
-Companion models do not usually fail at being smart. They fail **this turn**.
+Companion-chat **turn engine**: one `sendTurn` per user line. No backend. Bring your UI, API key, and a character pack.
 
-They fetch a glass of water you did not ask to be served. They say「你先忙」when you asked a question. They return parentheses with no spoken line. Or the app decides the reply was not good enough and silently hits the model again.
+**This turn does:** classify once → write a constraint card → strip servant / scold / dodge lines without inventing a replacement → salvage **at most once** → carry mood (attachment / hurt / trust / guard) plus local memory into the next line. `displayText` may have a short stage paren; `spokenText` is the line itself.
 
-This is a **no-backend turn engine** for that problem. You bring the UI, the API key, and a character pack. Each user line is one `sendTurn`: classify the turn, strip forbidden families without inventing a replacement, salvage **at most once**, and let mood carry so the next greeting does not wipe last night's sting.
+Models usually do not fail at being smart. They fail this turn: pouring water you did not ask for, answering a question with「你先忙」, returning parentheses with no spoken line, or silently hitting the model again because the reply “felt weak”.
 
 它不是 VTuber 平台，不是完整 App，也不绑任何人设。差别在回合纪律，不在立绘和实时语音。
 
