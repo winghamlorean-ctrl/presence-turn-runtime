@@ -1,0 +1,107 @@
+%%{init: {
+  "theme": "dark",
+  "themeVariables": {
+    "fontFamily": "Segoe UI, Microsoft YaHei, sans-serif",
+    "fontSize": "13px",
+    "background": "#000000",
+    "primaryColor": "#141414",
+    "primaryTextColor": "#f2f2f2",
+    "primaryBorderColor": "#737373",
+    "lineColor": "#525252",
+    "secondaryColor": "#0a0a0a",
+    "tertiaryColor": "#1a1a1a",
+    "clusterBkg": "#0a0a0a",
+    "clusterBorder": "#3f3f3f"
+  },
+  "flowchart": { "curve": "basis", "nodeSpacing": 18, "rankSpacing": 28, "padding": 12 }
+}}%%
+flowchart TB
+  title["presence-turn-runtime · sendTurn<br/>开源仓完整一轮 · 无后端 · 不绑人设"]
+
+  title --> in
+  in["sendTurn<br/>runtime/sendTurn.js<br/>一轮入口"]
+  pack["setActivePack<br/>pack/context.js<br/>换角色包"]
+  auth["validate llm<br/>apiKey / endpoint / model<br/>没 Key 即停"]
+  in --> pack --> auth
+
+  auth --> ingest
+  auth --> retrieve
+  auth --> classify
+  auth --> engine
+
+  subgraph MEM["memory"]
+    ingest["ingestUserFacts<br/>memory.js<br/>事实入库"]
+    memStore[("ptr_local_memories_v1<br/>localStorage · cap 40<br/>记忆落盘")]
+    retrieve["retrieveMemories<br/>token overlap · k=4<br/>捞 4 条"]
+    ingest --> memStore --> retrieve
+  end
+
+  subgraph POL["policy"]
+    classify["resolveUserTurnPolicy<br/>userTurnPolicy.js<br/>分类一次"]
+    card["buildTurnConstraintCard<br/>must / forbidFamilies<br/>本轮规矩"]
+    classify --> card
+  end
+
+  subgraph EMO["emotion engine · src/engines/"]
+    engine["runPresenceBehaviorEngine<br/>persist:false<br/>情绪引擎"]
+    load["loadAffectState<br/>attachmentFloor<br/>读叠态"]
+    affStore[("ptr_affect_state_v1<br/>localStorage · events 48<br/>心情存储")]
+    fam["matchSignalFamilies<br/>presenceSignalFamilies<br/>信号分层"]
+    resid["detectResidualMood<br/>90min / 6h window<br/>近窗惯性"]
+    w["computeDialogueWeights<br/>pressure / mass / scale<br/>对话加权"]
+    delta["updateStateForSignal<br/>BASE_DELTAS × scale<br/>改四维"]
+    damp["dampHealDelta<br/>rejectMass<br/>愈合变慢"]
+    contra{"findContradiction<br/>6h 对立事件<br/>态度拧着?"}
+    stash["_pendingAffectCommit<br/>成功前不落盘<br/>先挂起"]
+    gate{"applyAffectGate<br/>general + residual flags<br/>闲聊不装无事"}
+    forces["deriveTurnForces<br/>threat/probe/warmth<br/>本轮力"]
+    region["judgeRegion<br/>hurt×attach×forces<br/>反应区"]
+    map["mapRegionToStrategy<br/>must/forbid/hints<br/>必做/禁止"]
+    fmt["formatPromptBlock<br/>toneBits + inertia<br/>写成约束"]
+    ten["tensionActive<br/>flags ∪ posture ∪ layer<br/>收紧参数?"]
+    affStore --> load
+    engine --> load --> fam --> resid --> w --> delta --> damp --> contra --> stash --> gate --> forces --> region --> map --> fmt --> ten
+  end
+
+  hist["history slice<br/>greeting 4 · else 10<br/>带上下文"]
+  prompt["compilePrompt<br/>system 多层拼接<br/>发给模型"]
+  retrieve --> prompt
+  card --> prompt
+  ten --> prompt
+  hist --> prompt
+
+  llm1["callChatOnce #1<br/>0.55/180 or 0.8/240<br/>第一枪"]
+  fail["discardPending<br/>rollback affect<br/>心情不改"]
+  prompt --> llm1
+  ten --> llm1
+  llm1 -.->|抛错| fail
+
+  parse["parseModelReplies<br/>JSON | plaintext<br/>拆气泡"]
+  dedupe["dedupeIdenticalReplies<br/>composer.js<br/>去重"]
+  strip["applyForbidStrip<br/>strip, never invent<br/>只剥不编"]
+  clean["preferCleanApiText<br/>longest clean clause<br/>留残句"]
+  llm1 --> parse --> dedupe --> strip --> clean
+
+  salv["evaluateSalvageNeed<br/>reasons[]<br/>稿坏了?"]
+  tens["evaluateTensionReplies<br/>tensionGuard<br/>张力翻车?"]
+  retry["shouldRetryTension<br/>context gate<br/>日常不连打"]
+  judge{"needSecond?<br/>salvage ∪ retry · ≤1<br/>再打一枪?"}
+  clean --> salv --> judge
+  clean --> tens --> retry --> judge
+
+  dir["rewrite directive<br/>tension card first<br/>指出错处"]
+  llm2["callChatOnce #2<br/>temp ≤0.35<br/>最多一次"]
+  adopt{"shouldAdoptSalvageResult<br/>len / reasons / cite<br/>换不换"}
+  trim["slice maxBubbles<br/>tension ≤2<br/>气泡封顶"]
+  commit["commitPendingAffectState<br/>saveAffectState<br/>心情落盘"]
+  out["return<br/>replies/policy/presence<br/>交给 UI"]
+
+  judge -->|再打| dir --> llm2
+  judge -.->|不必| trim
+  llm1 -.-> llm2
+  llm2 --> adopt --> trim
+  llm2 -.->|失败| trim
+  trim --> commit
+  commit -->|回写| affStore
+  commit --> out
+  fail -.-> out

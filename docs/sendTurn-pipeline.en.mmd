@@ -1,0 +1,107 @@
+%%{init: {
+  "theme": "dark",
+  "themeVariables": {
+    "fontFamily": "Segoe UI, system-ui, sans-serif",
+    "fontSize": "13px",
+    "background": "#000000",
+    "primaryColor": "#141414",
+    "primaryTextColor": "#f2f2f2",
+    "primaryBorderColor": "#737373",
+    "lineColor": "#525252",
+    "secondaryColor": "#0a0a0a",
+    "tertiaryColor": "#1a1a1a",
+    "clusterBkg": "#0a0a0a",
+    "clusterBorder": "#3f3f3f"
+  },
+  "flowchart": { "curve": "basis", "nodeSpacing": 18, "rankSpacing": 28, "padding": 12 }
+}}%%
+flowchart TB
+  title["presence-turn-runtime · sendTurn<br/>full OSS turn · no backend · pack-agnostic"]
+
+  title --> in
+  in["sendTurn<br/>runtime/sendTurn.js<br/>turn entry"]
+  pack["setActivePack<br/>pack/context.js<br/>swap character pack"]
+  auth["validate llm<br/>apiKey / endpoint / model<br/>stop if no key"]
+  in --> pack --> auth
+
+  auth --> ingest
+  auth --> retrieve
+  auth --> classify
+  auth --> engine
+
+  subgraph MEM["memory"]
+    ingest["ingestUserFacts<br/>memory.js<br/>facts in"]
+    memStore[("ptr_local_memories_v1<br/>localStorage · cap 40<br/>persist")]
+    retrieve["retrieveMemories<br/>token overlap · k=4<br/>top 4 hits"]
+    ingest --> memStore --> retrieve
+  end
+
+  subgraph POL["policy"]
+    classify["resolveUserTurnPolicy<br/>userTurnPolicy.js<br/>classify once"]
+    card["buildTurnConstraintCard<br/>must / forbidFamilies<br/>this-turn rules"]
+    classify --> card
+  end
+
+  subgraph EMO["emotion engine · src/engines/"]
+    engine["runPresenceBehaviorEngine<br/>persist:false<br/>affect engine"]
+    load["loadAffectState<br/>attachmentFloor<br/>load stacks"]
+    affStore[("ptr_affect_state_v1<br/>localStorage · events 48<br/>mood store")]
+    fam["matchSignalFamilies<br/>presenceSignalFamilies<br/>signal families"]
+    resid["detectResidualMood<br/>90min / 6h window<br/>near-window inertia"]
+    w["computeDialogueWeights<br/>pressure / mass / scale<br/>dialogue weights"]
+    delta["updateStateForSignal<br/>BASE_DELTAS × scale<br/>update 4 dims"]
+    damp["dampHealDelta<br/>rejectMass<br/>slow heal"]
+    contra{"findContradiction<br/>6h opposing events<br/>attitude clash?"}
+    stash["_pendingAffectCommit<br/>no disk until success<br/>stash first"]
+    gate{"applyAffectGate<br/>general + residual flags<br/>don't fake fine"}
+    forces["deriveTurnForces<br/>threat/probe/warmth<br/>turn forces"]
+    region["judgeRegion<br/>hurt×attach×forces<br/>reaction region"]
+    map["mapRegionToStrategy<br/>must/forbid/hints<br/>must / forbid"]
+    fmt["formatPromptBlock<br/>toneBits + inertia<br/>write constraints"]
+    ten["tensionActive<br/>flags ∪ posture ∪ layer<br/>tighten params?"]
+    affStore --> load
+    engine --> load --> fam --> resid --> w --> delta --> damp --> contra --> stash --> gate --> forces --> region --> map --> fmt --> ten
+  end
+
+  hist["history slice<br/>greeting 4 · else 10<br/>context window"]
+  prompt["compilePrompt<br/>layered system join<br/>to the model"]
+  retrieve --> prompt
+  card --> prompt
+  ten --> prompt
+  hist --> prompt
+
+  llm1["callChatOnce #1<br/>0.55/180 or 0.8/240<br/>first shot"]
+  fail["discardPending<br/>rollback affect<br/>mood unchanged"]
+  prompt --> llm1
+  ten --> llm1
+  llm1 -.->|throw| fail
+
+  parse["parseModelReplies<br/>JSON | plaintext<br/>split bubbles"]
+  dedupe["dedupeIdenticalReplies<br/>composer.js<br/>dedupe"]
+  strip["applyForbidStrip<br/>strip, never invent<br/>strip only"]
+  clean["preferCleanApiText<br/>longest clean clause<br/>keep residue"]
+  llm1 --> parse --> dedupe --> strip --> clean
+
+  salv["evaluateSalvageNeed<br/>reasons[]<br/>draft broken?"]
+  tens["evaluateTensionReplies<br/>tensionGuard<br/>tension failure?"]
+  retry["shouldRetryTension<br/>context gate<br/>no daily double-hit"]
+  judge{"needSecond?<br/>salvage ∪ retry · ≤1<br/>second shot?"}
+  clean --> salv --> judge
+  clean --> tens --> retry --> judge
+
+  dir["rewrite directive<br/>tension card first<br/>point the fault"]
+  llm2["callChatOnce #2<br/>temp ≤0.35<br/>at most once"]
+  adopt{"shouldAdoptSalvageResult<br/>len / reasons / cite<br/>adopt?"}
+  trim["slice maxBubbles<br/>tension ≤2<br/>bubble cap"]
+  commit["commitPendingAffectState<br/>saveAffectState<br/>mood to disk"]
+  out["return<br/>replies/policy/presence<br/>to UI"]
+
+  judge -->|retry| dir --> llm2
+  judge -.->|skip| trim
+  llm1 -.-> llm2
+  llm2 --> adopt --> trim
+  llm2 -.->|fail| trim
+  trim --> commit
+  commit -->|writeback| affStore
+  commit --> out
+  fail -.-> out

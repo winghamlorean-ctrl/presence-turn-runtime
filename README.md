@@ -30,6 +30,16 @@ classify once → constraint card → strip (never invent) → salvage ≤ 1 →
 - **短聊节奏 + 本地记忆** → 像微信一句；检索进这一轮，不另起后端
 - **旁白 / 台词分开** → `displayText` 可带句首括号，`spokenText` 是纯台词（TTS 你自己接）
 
+## How a turn runs
+
+One `sendTurn` call: classify once → constraint card → strip (never invent) → salvage ≤ 1 → mood + memory. Function names are the source of truth; this is the OSS runtime only (no app shell, no fixed character).
+
+<p align="center">
+  <img src="docs/sendTurn-pipeline.en.png" alt="sendTurn pipeline: memory, policy, emotion engine, LLM #1, strip, salvage ≤1, commit" width="720" />
+</p>
+
+Source: [`docs/sendTurn-pipeline.en.mmd`](docs/sendTurn-pipeline.en.mmd) · [PNG](docs/sendTurn-pipeline.en.png) · [SVG](docs/sendTurn-pipeline.en.svg)
+
 ## What it is not
 
 - 角色包、剧情、Live2D、看一眼、通知、Android 壳
